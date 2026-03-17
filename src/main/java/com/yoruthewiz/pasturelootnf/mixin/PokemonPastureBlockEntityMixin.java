@@ -1,0 +1,86 @@
+package com.yoruthewiz.pasturelootnf.mixin;
+
+import com.cobblemon.mod.common.api.drop.DropEntry;
+import com.cobblemon.mod.common.api.drop.DropTable;
+import com.cobblemon.mod.common.api.drop.ItemDropEntry;
+import com.cobblemon.mod.common.block.entity.PokemonPastureBlockEntity;
+import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.pokemon.FormData;
+import com.yoruthewiz.pasturelootnf.Config;
+import com.yoruthewiz.pasturelootnf.PastureLoot;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Mixin(PokemonPastureBlockEntity.class)
+public abstract class PokemonPastureBlockEntityMixin {
+
+    @Unique
+    private static final Logger LOGGER = PastureLoot.LOGGER;
+
+    @Unique
+    private static Config getConfig() {
+        return PastureLoot.INSTANCE.getConfig();
+    }
+
+    @Inject(at = @At("HEAD"), method = "TICKER$lambda$0")
+    private static void tick(Level world, BlockPos pos, BlockState state, PokemonPastureBlockEntity blockEntity, CallbackInfo ci) {
+        if (world.isClientSide) return;
+
+        blockEntity.getTetheredPokemon().forEach(tethering -> {
+            double randomNumber = Math.random();
+            if (randomNumber < getConfig().getDropChancePerTick()) {
+                Pokemon pokemon = tethering.getPokemon();
+                if (pokemon != null && !pokemon.isFainted()) {
+                    PokemonEntity entity = pokemon.getEntity();
+                    if (entity == null) return;
+
+                    try {
+                        FormData form = pokemon.getForm();
+                        DropTable dropTable = form.getDrops();
+                        List<DropEntry> drops = dropTable.getDrops(dropTable.getAmount(), pokemon);
+                        ServerLevel serverWorld = (ServerLevel) world;
+                        if (drops.isEmpty()) return;
+
+                        DropEntry drop = drops.get(serverWorld.random.nextInt(drops.size()));
+                        if (drop instanceof ItemDropEntry itemDropEntry) {
+                            if (!Arrays.asList(getConfig().getItemBlacklist()).contains(itemDropEntry.getItem().toString())) {
+                                if (getConfig().legacyFlattenItemQuantity()) {
+                                    Item item = world.registryAccess().registryOrThrow(Registries.ITEM).get(itemDropEntry.getItem());
+                                    if (item != null) {
+                                        ItemStack stack = new ItemStack(item, 1);
+                                        world.addFreshEntity(new ItemEntity(world, entity.getX(), entity.getY(), entity.getZ(), stack));
+                                        LOGGER.debug("Dropped {} from {} at {}", stack, pokemon.getSpecies().getName(), pos);
+                                    }
+                                } else {
+                                    itemDropEntry.drop(entity, serverWorld, entity.position(), null);
+                                    LOGGER.debug("Dropping {} from {} with quantityRange={} at {}", itemDropEntry.getItem(), pokemon.getSpecies().getName(), itemDropEntry.getQuantityRange(), pos);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("Error while dropping loot", e);
+                    }
+                }
+            }
+        });
+
+
+    }
+
+}

@@ -1,0 +1,42 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+#issueTrackerURL=""
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+#updateJSONURL=""
+#displayURL=""
+#logoFile=""
+credits="DrEmixam (Original mod's author)"
+authors="YoruTheWizard"
+description='''
+Cobblemon mod to make pastured pokémon randomly drop items from their loot table. The items are dropped at the pokémon's location.Cobblemon mod to make pastured pokémon randomly drop items from their loot table. The items are dropped at the pokémon's location.
+A NeoForge port for the Cobblemon Pasture Loot Mod by DrEmixam
+'''
+
+[[mixins]]
+config="${mod_id}.mixins.json"
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="cobblemon"
+    type="required"
+    versionRange="${cobblemon_version_range}"
+    ordering="AFTER"
+    side="BOTH"
