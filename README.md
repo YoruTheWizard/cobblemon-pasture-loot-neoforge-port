@@ -1,6 +1,6 @@
 # DISCONTINUED!!
 This mod is now discontinued and will not receive any more updates due to the original mod having now a NeoForge version.
-Please download the [original mod](https://modrinth.com/mod/cobblemon-pasture-loot) instead!
+Please download the [original mod](https://github.com/dremixam/CobblemonPastureLoot) instead!
 
 # Cobblemon Pasture Loot NeoForged
 
