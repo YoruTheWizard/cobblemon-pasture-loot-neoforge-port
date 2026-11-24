@@ -1,3 +1,7 @@
+# DISCONTINUED!!
+This mod is now discontinued and will not receive any more updates due to the original mod having now a NeoForge version.
+Please download the [original mod](https://modrinth.com/mod/cobblemon-pasture-loot) instead!
+
 # Cobblemon Pasture Loot NeoForged
 
 > Want to abandon the hunter-gatherer lifestyle and have your pastured pokémon do the work for you? This mod is for you!
